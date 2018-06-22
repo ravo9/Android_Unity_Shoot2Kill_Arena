@@ -6,13 +6,13 @@ public class PlayerMovementComponent : MonoBehaviour {
 
     private Rigidbody2D rb2d;
     private float maxVelocity;
-    private Vector2 velocity;
+    private Vector2 velocityLeft, velocityRight, velocityJump;
 
     private SpriteRenderer spriteR;
     private Sprite[] sprites;
 
-    // -1 means 'left'; '1' means 'right'
-    private int direction;
+    // -2 means 'going left'; -1 means 'staying towards left'; '1' means 'staying towards right'; '2' means 'going right' 
+    private int state;
 
     private Vector2 buttonLeftPosition;
 
@@ -25,90 +25,98 @@ public class PlayerMovementComponent : MonoBehaviour {
 
         rb2d = GetComponent<Rigidbody2D>();
         maxVelocity = 10.0f;
-        velocity = new Vector2(0.0f, 0.0f);
+
+        velocityRight = new Vector2(4.5f, 0.0f);
+        velocityLeft = new Vector2(-4.5f, 0.0f);
+        velocityJump = new Vector2(0.0f, 24.0f);
 
         spriteR = GetComponent<SpriteRenderer>();
         sprites = Resources.LoadAll<Sprite>("simonSpritesheetAr15");
-        direction = 1;
+        state = 1;
 
         acc = 0;
-        spriteFreezingValue = 20;
+        spriteFreezingValue = 2;
         spriteChangeFreezer = spriteFreezingValue;
     }
 
     // Update is called once per frame
     void Update() {
-
+        SpriteUpdate();
     }
 
-    public void moveLeft()
+    public void MoveLeft()
     {
-        velocity = new Vector2(-4.5f, 0.0f);
+        state = -2;
+        
         if (rb2d.velocity.x > -3.5f)
-        {
-            rb2d.AddForce(velocity, ForceMode2D.Impulse);
-        }
-
-        // Spritesheet
-        direction = -1;
-
-        if (spriteChangeFreezer == 0)
-        {
-            if (acc % 3 == 0)
-                spriteR.sprite = sprites[5];
-            else if (acc % 3 == 1)
-                spriteR.sprite = sprites[6];
-            else
-                spriteR.sprite = sprites[7];
-
-            spriteChangeFreezer = spriteFreezingValue;
-            acc++;
-        }
-    
-        spriteChangeFreezer--;
+            rb2d.AddForce(velocityLeft * Time.deltaTime * 100, ForceMode2D.Impulse);
     }
 
-    public void moveRight()
+    public void MoveRight()
     {
-        velocity = new Vector2(4.5f, 0.0f);
+        state = 2;
+
         if (rb2d.velocity.x < 3.5f)
-        {
-            rb2d.AddForce(velocity, ForceMode2D.Impulse);
-        }
-
-        // Spritesheet
-        direction = 1;
-
-        if (spriteChangeFreezer == 0)
-        {
-            if (acc % 3 == 0)
-                spriteR.sprite = sprites[1];
-            else if (acc % 3 == 1)
-                spriteR.sprite = sprites[2];
-            else
-                spriteR.sprite = sprites[3];
-
-            spriteChangeFreezer = spriteFreezingValue;
-            acc++;
-        }
-
-        spriteChangeFreezer--;
+            rb2d.AddForce(velocityRight * Time.deltaTime * 100, ForceMode2D.Impulse);
     }
 
-    public void stopMoving()
+    public void StopMoving()
     {
         rb2d.velocity = new Vector2(0.0f, rb2d.velocity.y);
 
         // Spritesheet
-        if (direction == 1)
-            spriteR.sprite = sprites[0];
-        else
-            spriteR.sprite = sprites[4];
+        if (state == -2)
+            state = -1;
+        else if (state == 2)
+            state = 1;
     }
 
-    public void jump()
+    public void SpriteUpdate()
     {
-        velocity = new Vector2(0.0f, 24.0f);
-        rb2d.AddForce(velocity, ForceMode2D.Impulse);
+        
+        if (state == -1)
+            spriteR.sprite = sprites[4];
+        else if (state == 1)
+            spriteR.sprite = sprites[0];
+        else if (state == -2)
+        {
+            if (spriteChangeFreezer <= 0)
+            {
+                if (acc % 3 == 0)
+                    spriteR.sprite = sprites[5];
+                else if (acc % 3 == 1)
+                    spriteR.sprite = sprites[6];
+                else
+                    spriteR.sprite = sprites[7];
+
+                spriteChangeFreezer = spriteFreezingValue;
+                acc++;
+            }
+
+            spriteChangeFreezer--;
+        }
+        else if (state == 2)
+        {
+            if (spriteChangeFreezer <= 0)
+            {
+                if (acc % 3 == 0)
+                    spriteR.sprite = sprites[1];
+                else if (acc % 3 == 1)
+                    spriteR.sprite = sprites[2];
+                else
+                    spriteR.sprite = sprites[3];
+
+                spriteChangeFreezer = spriteFreezingValue;
+                acc++;
+            }
+
+            spriteChangeFreezer--;
+        }
+    }
+
+   
+    public void Jump()
+    {
+        rb2d.AddForce(velocityJump, ForceMode2D.Impulse);
     }
 }
