@@ -7,6 +7,8 @@ public class UiControlComponent : MonoBehaviour
     private PlayerMovementComponent playerMovementComponent;
 
     private int screenWidth;
+    private float roundButtonWidth;
+
     private Vector2 controlElementsScale;
 
     private Vector2 movementButtonLeftPosition;
@@ -19,13 +21,19 @@ public class UiControlComponent : MonoBehaviour
 
         screenWidth = Screen.width;
 
+        roundButtonWidth = GameObject.Find("buttonMoveLeft").GetComponent<RectTransform>().rect.width;
+
         movementButtonLeftPosition = new Vector2(screenWidth * 0.1f, screenWidth * 0.1f);
         movementButtonRightPosition = new Vector2(screenWidth * 0.8f, screenWidth * 0.1f);
         movementButtonJumpPosition = new Vector2(screenWidth * 0.45f, screenWidth * 0.1f);
 
-        //controlElementsScale = new Vector2()
+        //controlElementsScale = new Vector3(4.0f, 4.0f, 0);
 
-        //GameObject.Find("buttonMoveLeft").transform.scale = sc
+        controlElementsScale = new Vector3(screenWidth * 0.1f/roundButtonWidth * 1.0f, screenWidth * 0.1f/roundButtonWidth * 1.0f, 0.0f);
+
+        GameObject.Find("buttonMoveLeft").transform.localScale = controlElementsScale;
+        GameObject.Find("buttonMoveRight").transform.localScale = controlElementsScale;
+        GameObject.Find("buttonMoveJump").transform.localScale = controlElementsScale;
 
         GameObject.Find("buttonMoveLeft").transform.position = movementButtonLeftPosition;
         GameObject.Find("buttonMoveRight").transform.position = movementButtonRightPosition;
